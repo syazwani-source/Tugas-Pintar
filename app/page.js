@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Plus, Check, Trash2, ListTodo, Circle } from 'lucide-react';
+import { Plus, Check, Trash2, ListTodo, Circle, LayoutGrid, CircleDashed } from 'lucide-react';
 import './styles.css';
 
 const initialTasks = [
@@ -33,40 +33,39 @@ export default function Home() {
 
   const visible = useMemo(() => tasks.filter((t) => filter === 'all' || (filter === 'active' ? !t.done : t.done)), [tasks, filter]);
   const completed = tasks.filter((t) => t.done).length;
+  const remaining = tasks.length - completed;
+  const progress = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
 
   return (
     <main className="page">
-      <section className="app-shell">
-        <header className="hero">
-          <div className="brand"><span className="brand-icon"><ListTodo size={22} /></span><span>Tugas Pintar</span></div>
-          <p>Urus tugasan anda dengan lebih mudah dan teratur.</p>
-          <div className="progress"><div className="progress-fill" style={{ width: `${tasks.length ? (completed / tasks.length) * 100 : 0}%` }} /></div>
-          <small>{completed} daripada {tasks.length} tugasan selesai</small>
-        </header>
+      <aside className="sidebar">
+        <div className="brand"><span className="brand-mark"><ListTodo size={20} /></span><div><strong>Tugas Pintar</strong><small>Ruang tugasan anda</small></div></div>
+        <nav>
+          <button className={filter === 'all' ? 'nav-active' : ''} onClick={() => setFilter('all')}><LayoutGrid size={18} /> Semua Tugasan <b>{tasks.length}</b></button>
+          <button className={filter === 'active' ? 'nav-active' : ''} onClick={() => setFilter('active')}><CircleDashed size={18} /> Belum Selesai <b>{remaining}</b></button>
+          <button className={filter === 'done' ? 'nav-active' : ''} onClick={() => setFilter('done')}><Check size={18} /> Selesai <b>{completed}</b></button>
+        </nav>
+        <div className="side-progress"><span>PROGRES HARI INI</span><strong>{progress}%</strong><div><i style={{ width: `${progress}%` }} /></div><small>{completed} daripada {tasks.length} selesai</small></div>
+        <div className="side-note">Buat sedikit demi sedikit.<br />Yang penting, terus bergerak. ✦</div>
+      </aside>
 
-        <form className="add-form" onSubmit={addTask}>
-          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Tambah tugasan baru..." aria-label="Tugasan baru" />
-          <button type="submit"><Plus size={19} /> Tambah</button>
-        </form>
+      <section className="content">
+        <header className="topbar"><div><span className="eyebrow">SENARAI HARI INI</span><h1>{filter === 'all' ? 'Semua Tugasan' : filter === 'active' ? 'Belum Selesai' : 'Tugasan Selesai'}</h1><p>Rancang dengan tenang, selesaikan satu demi satu.</p></div><div className="date">Hari ini<br /><strong>♡</strong></div></header>
 
-        <div className="toolbar">
-          <div className="filters">
-            {[['all','Semua'],['active','Belum selesai'],['done','Selesai']].map(([key,label]) => <button key={key} onClick={() => setFilter(key)} className={filter === key ? 'active' : ''}>{label}</button>)}
-          </div>
-          <span className="count">{visible.length} tugasan</span>
-        </div>
+        <form className="add-form" onSubmit={addTask}><div className="plus"><Plus size={21} /></div><input value={text} onChange={(e) => setText(e.target.value)} placeholder="Apa yang perlu dibuat?" aria-label="Tugasan baru" /><button type="submit">Tambah</button></form>
+
+        <div className="summary"><span><b>{tasks.length}</b> Jumlah</span><span><b>{remaining}</b> Belum selesai</span><span><b>{completed}</b> Selesai</span></div>
 
         <div className="task-list">
           {visible.length === 0 ? <div className="empty"><Circle size={34} /><p>Tiada tugasan di sini.</p></div> : visible.map((task) => (
             <article className={`task ${task.done ? 'done' : ''}`} key={task.id}>
-              <button className="check" onClick={() => toggleTask(task.id)} aria-label={task.done ? 'Tandakan belum selesai' : 'Tandakan selesai'}>{task.done ? <Check size={17} /> : null}</button>
-              <span className="task-title">{task.title}</span>
-              <button className="delete" onClick={() => deleteTask(task.id)} aria-label="Padam tugasan"><Trash2 size={18} /></button>
+              <button className="check" onClick={() => toggleTask(task.id)} aria-label={task.done ? 'Tandakan belum selesai' : 'Tandakan selesai'}>{task.done ? <Check size={16} /> : null}</button>
+              <div className="task-copy"><span>{task.title}</span><small>{task.done ? 'Selesai' : 'Dalam senarai hari ini'}</small></div>
+              <button className="delete" onClick={() => deleteTask(task.id)} aria-label="Padam tugasan"><Trash2 size={17} /></button>
             </article>
           ))}
         </div>
-
-        <footer>Tip: Pecahkan tugasan besar kepada langkah kecil supaya lebih mudah diselesaikan. ✨</footer>
+        <footer>Disiplin kecil hari ini, hasil besar esok.</footer>
       </section>
     </main>
   );
